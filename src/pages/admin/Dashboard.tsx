@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, Timestamp, deleteDoc, doc, writeBatch } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 import { signOut } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
@@ -10,7 +10,8 @@ import {
 import { 
   Download, Filter, Search, LogOut, LayoutDashboard, Database, 
   Users, Calendar, ChevronRight, FileText, TrendingUp, AlertCircle,
-  ArrowUpRight, ArrowDownRight, Clock, ArrowLeft, X, Printer, Copy, Check, Zap, BarChart3, ClipboardList, Star
+  ArrowUpRight, ArrowDownRight, Clock, ArrowLeft, X, Printer, Copy, Check, Zap, BarChart3, ClipboardList, Star,
+  Trash2, CheckSquare, Square
 } from 'lucide-react';
 import { format, startOfWeek, startOfMonth, isWithinInterval, subDays } from 'date-fns';
 import { json2csv } from 'json-2-csv';
@@ -80,6 +81,12 @@ const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'responses' | 'reports' | 'survey-insights'>('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [selectedResponseIds, setSelectedResponseIds] = useState<string[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    type: 'single' | 'selected' | 'all';
+    id?: string;
+  } | null>(null);
   const [reportRoleFilter, setReportRoleFilter] = useState('All');
   const [reportExpFilter, setReportExpFilter] = useState('All');
   const [reportStartDate, setReportStartDate] = useState('');
@@ -207,7 +214,7 @@ const AdminDashboard: React.FC = () => {
       const commonMapping = {
         background: "Part I – Background & Experience",
         tasksWorkflow: "Part II – Tasks and Workflow",
-        trainingNeeds: "Part III – Training Needs",
+        trainingNeeds: "Part III – Competencies / Skills",
         communication: "Part IV – Communication Skills",
         aiEssentials: "Part V – AI Essentials",
         final: "Final Open Feedback"
@@ -366,18 +373,19 @@ const AdminDashboard: React.FC = () => {
         .map(([name, value]) => ({ name, value: value as number }));
     };
 
-    const vaRoles = [
-      'Medical Biller',
-      'Medical Receptionist',
-      'Medical Administrative Assistant',
-      'Medical Scribe',
-      'Health Educator',
-      'Dental Receptionist',
-      'Dental Biller',
-      'Executive Assistant VA',
-      'General Business VA'
-    ];
+    const roleIdMap: Record<string, string> = {
+      'Medical Biller': 'biller',
+      'Medical Receptionist': 'receptionist',
+      'Medical Administrative Assistant': 'admin',
+      'Medical Scribe': 'scribe',
+      'Health Educator': 'health-educator',
+      'Dental Receptionist': 'dental-receptionist',
+      'Dental Biller': 'dental-biller',
+      'Executive Assistant VA': 'ea',
+      'General Business VA': 'gb'
+    };
 
+    const vaRoles = Object.keys(roleIdMap);
     const supportRoles = ['CDVO / OS', 'Sales and Placement'];
 
     if (isSupport) {
@@ -418,38 +426,60 @@ const AdminDashboard: React.FC = () => {
     return {
       total: roleResponses.length,
       topRole: topVARole,
-      part1: mergeAggregates(vaRoles.map(r => 
-        aggregateGenericSection(`${r}-background`, ['software_tools', 'practice_types'], true)
-      )).slice(0, 15),
-      part2: mergeAggregates(vaRoles.map(r => 
-        aggregateGenericSection(`${r}-tasks-workflow`, 'task_grid', true)
-      )).slice(0, 15),
-      part3: mergeAggregates(vaRoles.map(r => 
-        aggregateGenericSection(`${r}-training-needs`, ['competencies_skills', 'specialized_skills'], true)
-      )).slice(0, 20),
-      part4: mergeAggregates(vaRoles.map(r => 
-        aggregateGenericSection(`${r}-communication-skills`, 'comm_difficulty_grid', true)
-      )).slice(0, 15),
-      part5: mergeAggregates(vaRoles.map(r => 
-        aggregateGenericSection(`${r}-ai-essentials`, ['ai_automation_level', 'ai_tool_proficiency'], true)
-      )).slice(0, 15),
+      part1: mergeAggregates([
+        aggregateGenericSection('client-initial', ['practice_type', 'va_tenure']),
+        ...vaRoles.map(r => {
+          const id = roleIdMap[r];
+          return aggregateGenericSection(`${id}-background`, ['software_tools', 'practice_types'], true);
+        })
+      ]).slice(0, 15),
+      part2: mergeAggregates(vaRoles.map(r => {
+        const id = roleIdMap[r];
+        return aggregateGenericSection(`${id}-tasks-workflow`, [`${id}_task_difficulty`, 'task_grid', `${id}_time_consuming_tasks`], true);
+      })).slice(0, 15),
+      part3: mergeAggregates(vaRoles.map(r => {
+        const id = roleIdMap[r];
+        return aggregateGenericSection(`${id}-competencies-skills`, ['competencies_skills', 'specialized_skills'], true);
+      })).slice(0, 20),
+      part4: mergeAggregates(vaRoles.map(r => {
+        const id = roleIdMap[r];
+        return aggregateGenericSection(`${id}-communication-skills`, [`${id}_comm_difficulty`, 'comm_difficulty_grid', 'verbal_comm_confidence', `${id}_speaking_confidence`], true);
+      })).slice(0, 15),
+      part5: mergeAggregates(vaRoles.map(r => {
+        const id = roleIdMap[r];
+        return aggregateGenericSection(`${id}-ai-essentials`, [
+          'ai_automation_level', 
+          'ai_tool_proficiency', 
+          'ai_usage_areas', 
+          'ai_skills_to_learn',
+          `${id}_ai_usage`,
+          `${id}_ai_tool_comfort`,
+          `${id}_ai_usage_areas`,
+          `${id}_ai_skills_to_learn`
+        ], true);
+      })).slice(0, 15),
       
       // Legacy fields for backward compatibility if needed in UI
-      challenges: mergeAggregates(vaRoles.map(r => 
-        aggregateGenericSection(`${r}-challenges`, 'challenges_scenarios', true)
-      )).slice(0, 10),
-      trainingNeeds: mergeAggregates(vaRoles.map(r => 
-        aggregateGenericSection(`${r}-competencies`, ['competencies_skills', 'specialized_skills'], true)
-      )).slice(0, 15),
-      systemRequirements: mergeAggregates(vaRoles.map(r => 
-        aggregateGenericSection(`${r}-background`, 'software_tools', true)
-      )).slice(0, 10),
-      tasksWorkflowOperations: mergeAggregates(vaRoles.map(r => 
-        aggregateGenericSection(`${r}-tasks-workflow`, 'task_grid', true)
-      )).slice(0, 10),
-      aiEssentials: mergeAggregates(vaRoles.map(r => 
-        aggregateGenericSection(`${r}-final`, ['ai_automation_level', 'ai_tool_proficiency'], false)
-      )).slice(0, 10),
+      challenges: mergeAggregates(vaRoles.map(r => {
+        const id = roleIdMap[r];
+        return aggregateGenericSection(`${id}-challenges`, 'challenges_scenarios', true);
+      })).slice(0, 10),
+      trainingNeeds: mergeAggregates(vaRoles.map(r => {
+        const id = roleIdMap[r];
+        return aggregateGenericSection(`${id}-competencies`, ['competencies_skills', 'specialized_skills'], true);
+      })).slice(0, 15),
+      systemRequirements: mergeAggregates(vaRoles.map(r => {
+        const id = roleIdMap[r];
+        return aggregateGenericSection(`${id}-background`, 'software_tools', true);
+      })).slice(0, 10),
+      tasksWorkflowOperations: mergeAggregates(vaRoles.map(r => {
+        const id = roleIdMap[r];
+        return aggregateGenericSection(`${id}-tasks-workflow`, 'task_grid', true);
+      })).slice(0, 10),
+      aiEssentials: mergeAggregates(vaRoles.map(r => {
+        const id = roleIdMap[r];
+        return aggregateGenericSection(`${id}-final`, ['ai_automation_level', 'ai_tool_proficiency'], false);
+      })).slice(0, 10),
       
       clientPerformanceByRole: (() => {
         const roleData: Record<string, { total: number, count: number }> = {};
@@ -644,6 +674,77 @@ const AdminDashboard: React.FC = () => {
     navigate('/admin/login');
   };
 
+  const handleDeleteResponse = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setDeleteConfirm({ type: 'single', id });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
+    setIsDeleting(true);
+    
+    try {
+      if (deleteConfirm.type === 'single' && deleteConfirm.id) {
+        await deleteDoc(doc(db, 'responses', deleteConfirm.id));
+        if (selectedResponse?.id === deleteConfirm.id) setSelectedResponse(null);
+        setSelectedResponseIds(prev => prev.filter(item => item !== deleteConfirm.id));
+      } else if (deleteConfirm.type === 'selected') {
+        const batch = writeBatch(db);
+        selectedResponseIds.forEach(id => {
+          batch.delete(doc(db, 'responses', id));
+        });
+        await batch.commit();
+        setSelectedResponseIds([]);
+        if (selectedResponse && selectedResponseIds.includes(selectedResponse.id)) {
+          setSelectedResponse(null);
+        }
+      } else if (deleteConfirm.type === 'all') {
+        const batchSize = 500;
+        for (let i = 0; i < responses.length; i += batchSize) {
+          const batch = writeBatch(db);
+          const chunk = responses.slice(i, i + batchSize);
+          chunk.forEach(res => {
+            batch.delete(doc(db, 'responses', res.id));
+          });
+          await batch.commit();
+        }
+        setSelectedResponseIds([]);
+        setSelectedResponse(null);
+      }
+      setDeleteConfirm(null);
+    } catch (error) {
+      console.error("Error during deletion:", error);
+      alert("Failed to delete. Please try again.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedResponseIds.length === 0) return;
+    setDeleteConfirm({ type: 'selected' });
+  };
+
+  const handleDeleteAll = () => {
+    if (responses.length === 0) return;
+    setDeleteConfirm({ type: 'all' });
+  };
+
+  const toggleSelectResponse = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedResponseIds(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedResponseIds.length === filteredResponses.length) {
+      setSelectedResponseIds([]);
+    } else {
+      setSelectedResponseIds(filteredResponses.map(r => r.id));
+    }
+  };
+
   const handleCopyEmail = (email: string) => {
     navigator.clipboard.writeText(email);
     setCopiedEmail(true);
@@ -656,15 +757,32 @@ const AdminDashboard: React.FC = () => {
 
   const getSummaryField = (res: SurveyResponse | null, type: 'challenge' | 'training' | 'method') => {
     if (!res || !res.sections) return 'N/A';
-    const role = res.role;
+    
+    const roleIdMap: Record<string, string> = {
+      'Medical Biller': 'biller',
+      'Medical Receptionist': 'receptionist',
+      'Medical Administrative Assistant': 'admin',
+      'Medical Scribe': 'scribe',
+      'Health Educator': 'health-educator',
+      'Dental Receptionist': 'dental-receptionist',
+      'Dental Biller': 'dental-biller',
+      'Executive Assistant VA': 'ea',
+      'General Business VA': 'gb'
+    };
+
+    const role = roleIdMap[res.role] || res.role;
     
     if (type === 'challenge') {
       return res.sections[`${role}-final`]?.biggest_challenge || 
-             res.sections[`${role}-challenges`]?.daily_challenges?.join(', ') || 'N/A';
+             res.sections[`${role}-challenges`]?.daily_challenges?.join(', ') || 
+             res.sections[`${role}-tasks-workflow`]?.time_consuming_tasks?.join(', ') ||
+             res.sections[`${role}-tasks-workflow`]?.biller_time_consuming_tasks?.join(', ') ||
+             'N/A';
     }
     
     if (type === 'training') {
-      const needs = res.sections[`${role}-training-needs`]?.competencies_skills || 
+      const needs = res.sections[`${role}-competencies-skills`]?.competencies_skills || 
+                    res.sections[`${role}-training-needs`]?.competencies_skills || 
                     res.sections[`${role}-competencies`]?.competencies_skills || 
                     res.sections[`${role}-training-skill`]?.specialized_training_needs || [];
       return Array.isArray(needs) ? (needs.length > 0 ? needs.join(', ') : 'N/A') : (needs || 'N/A');
@@ -840,15 +958,39 @@ const AdminDashboard: React.FC = () => {
               {activeTab === 'overview' && 'Dashboard Overview'}
               {activeTab === 'responses' && 'All Survey Responses'}
               {activeTab === 'reports' && 'Survey Reports'}
+              {activeTab === 'survey-insights' && 'Survey Insights'}
             </h1>
             <p className="text-gray-500 mt-1">
               {activeTab === 'overview' && `Welcome back, ${auth.currentUser?.email}`}
               {activeTab === 'responses' && `Managing ${responses.length} total submissions`}
               {activeTab === 'reports' && 'Aggregate insights and data analysis'}
+              {activeTab === 'survey-insights' && 'Question-by-question aggregate analysis'}
             </p>
           </div>
           
           <div className="flex items-center gap-3">
+            {activeTab === 'responses' && (
+              <>
+                {selectedResponseIds.length > 0 && (
+                  <button 
+                    onClick={handleDeleteSelected}
+                    disabled={isDeleting}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-100 transition-all shadow-sm disabled:opacity-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete Selected ({selectedResponseIds.length})
+                  </button>
+                )}
+                <button 
+                  onClick={handleDeleteAll}
+                  disabled={isDeleting || responses.length === 0}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-all shadow-sm disabled:opacity-50"
+                >
+                  <AlertCircle className="h-4 w-4" />
+                  Delete All
+                </button>
+              </>
+            )}
             <button 
               onClick={handleExport}
               disabled={isExporting}
@@ -1062,10 +1204,22 @@ const AdminDashboard: React.FC = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-gray-50/50">
+                    <th className="px-6 py-4 w-10">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); toggleSelectAll(); }}
+                        className="text-gray-400 hover:text-blue-600 transition-colors"
+                      >
+                        {selectedResponseIds.length === filteredResponses.length && filteredResponses.length > 0 ? (
+                          <CheckSquare className="h-5 w-5 text-blue-600" />
+                        ) : (
+                          <Square className="h-5 w-5" />
+                        )}
+                      </button>
+                    </th>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Respondent</th>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Submitted</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider"></th>
+                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -1073,8 +1227,23 @@ const AdminDashboard: React.FC = () => {
                     <tr 
                       key={res.id} 
                       onClick={() => setSelectedResponse(res)}
-                      className="hover:bg-gray-50 cursor-pointer transition-colors group"
+                      className={cn(
+                        "hover:bg-gray-50 cursor-pointer transition-colors group",
+                        selectedResponseIds.includes(res.id) && "bg-blue-50/30"
+                      )}
                     >
+                      <td className="px-6 py-4">
+                        <button 
+                          onClick={(e) => toggleSelectResponse(res.id, e)}
+                          className="text-gray-400 hover:text-blue-600 transition-colors"
+                        >
+                          {selectedResponseIds.includes(res.id) ? (
+                            <CheckSquare className="h-5 w-5 text-blue-600" />
+                          ) : (
+                            <Square className="h-5 w-5" />
+                          )}
+                        </button>
+                      </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className="font-medium text-gray-900">{res.full_name}</span>
@@ -1090,9 +1259,18 @@ const AdminDashboard: React.FC = () => {
                         {format(res.submitted_at.toDate(), 'MMM d, yyyy HH:mm')}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                          View <ChevronRight className="h-4 w-4" />
-                        </span>
+                        <div className="flex items-center justify-end gap-2">
+                          <button 
+                            onClick={(e) => handleDeleteResponse(res.id, e)}
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                            title="Delete Response"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                          <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                            View <ChevronRight className="h-4 w-4" />
+                          </span>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1330,7 +1508,7 @@ const AdminDashboard: React.FC = () => {
                   <div className="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center font-black text-lg">4</div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900 tracking-tight">
-                      {reportType === 'VA' ? 'Part IV - Challenges & Scenarios' : 'Part IV - AI Essentials'}
+                      {reportType === 'VA' ? 'Part IV - Communication Skills' : 'Part IV - AI Essentials'}
                     </h3>
                     <p className="text-xs text-slate-400 font-medium italic">Pain points and technology adoption</p>
                   </div>
@@ -1592,6 +1770,57 @@ const AdminDashboard: React.FC = () => {
         )}
       </div>
 
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {deleteConfirm && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden"
+            >
+              <div className="p-8">
+                <div className="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-6">
+                  <Trash2 className="w-8 h-8" />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                  {deleteConfirm.type === 'all' ? 'Delete All Responses?' : 
+                   deleteConfirm.type === 'selected' ? `Delete ${selectedResponseIds.length} Responses?` : 
+                   'Delete Response?'}
+                </h3>
+                <p className="text-slate-500 leading-relaxed">
+                  This action is permanent and cannot be undone. Are you sure you want to proceed?
+                </p>
+              </div>
+              <div className="p-6 bg-slate-50 flex items-center gap-3 justify-end">
+                <button
+                  onClick={() => setDeleteConfirm(null)}
+                  disabled={isDeleting}
+                  className="px-6 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={isDeleting}
+                  className="px-8 py-2.5 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-200 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    'Confirm Delete'
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Detail Modal */}
       <AnimatePresence>
         {selectedResponse && (
@@ -1624,6 +1853,13 @@ const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 print:hidden">
+                  <button 
+                    onClick={() => handleDeleteResponse(selectedResponse.id)}
+                    className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                    title="Delete Response"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
                   <button 
                     onClick={handlePrint}
                     className="p-2.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
@@ -1792,12 +2028,6 @@ const AdminDashboard: React.FC = () => {
                               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Support Role</h4>
                               <p className="text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm">
                                 {selectedResponse.sections?.['support-role']?.support_role || 'N/A'}
-                              </p>
-                            </div>
-                            <div>
-                              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Department</h4>
-                              <p className="text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm">
-                                {selectedResponse.sections?.['support-role']?.support_department || 'N/A'}
                               </p>
                             </div>
                           </div>

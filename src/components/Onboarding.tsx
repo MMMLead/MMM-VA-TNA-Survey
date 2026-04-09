@@ -46,7 +46,6 @@ export function Onboarding({ onStart }: OnboardingProps) {
     {
       type: "Virtual Assistant (Medical & Business)" as UserType,
       title: "Virtual Assistant (Medical & Business)",
-      description: "Evaluate your performance, identify growth areas, and share your experience to help us tailor your upskilling program.",
       icons: [Stethoscope, BarChart3],
       color: "bg-blue-600",
       cta: "Start VA Survey"
@@ -54,7 +53,6 @@ export function Onboarding({ onStart }: OnboardingProps) {
     {
       type: "Support Team" as UserType,
       title: "MMM Support Team",
-      description: "Provide internal feedback on VA readiness, placement success, and onboarding challenges.",
       icons: [ShieldCheck, Users],
       color: "bg-brand-teal",
       cta: "Start Support Survey"
@@ -115,11 +113,8 @@ export function Onboarding({ onStart }: OnboardingProps) {
                 </div>
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-slate-800 leading-tight">
-                VA Workflow & Training Survey
+                VA Upskilling Program Survey
               </h2>
-              <p className="text-slate-600 text-xl leading-relaxed font-medium">
-                Your feedback helps us improve VA performance, training, and overall service quality.
-              </p>
             </motion.div>
 
             <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-center gap-8">
@@ -139,9 +134,6 @@ export function Onboarding({ onStart }: OnboardingProps) {
                   </div>
                   <div className="space-y-4">
                     <h3 className="text-2xl font-black text-slate-900 group-hover:text-brand-teal transition-colors">{role.title}</h3>
-                    <p className="text-slate-500 leading-relaxed text-lg font-medium">
-                      {role.description}
-                    </p>
                   </div>
                   <div className="mt-4 w-full">
                     <div className="w-full py-5 bg-brand-teal text-white rounded-2xl font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-3 group-hover:bg-brand-teal/90 transition-all shadow-lg shadow-brand-teal/20 active:scale-95">

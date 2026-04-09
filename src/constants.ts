@@ -12,7 +12,7 @@ export const TASK_WORKFLOW_COLUMNS = ["NA", "1", "2", "3", "4"];
 export const TASK_WORKFLOW_LEGEND = "Legend:\nNA – Not Applicable / Not part of my role\n1 – Very Difficult – I often struggle and need help\n2 – Difficult – I can do it but sometimes need support\n3 – Manageable – I can perform the task independently\n4 – Easy – I can perform the task quickly and confidently";
 
 export const EXPERIENCE_OPTIONS = [
-  "No prior healthcare experience",
+  "Not Applicable / Current BCT Trainee",
   "No prior Business VA experience",
   "Less than 1 year",
   "1–2 years",
@@ -4701,17 +4701,6 @@ export const SUPPORT_SURVEY_SCHEMA: SupportSurveySchema = {
         type: "radio",
         label: "What is your role in MMM Support?",
         options: ["CDVO / OS", "Sales and Placement"],
-        required: true,
-      },
-      {
-        id: "support_department",
-        type: "radio",
-        label: "Department",
-        dependsOn: "support_role",
-        optionsMap: {
-          "CDVO / OS": ["CDVO", "OS"],
-          "Sales and Placement": ["Sales", "Placement"]
-        },
         required: true,
       },
     ],
