@@ -136,6 +136,121 @@ const getAISection = (role: Role): Section => ({
   ]
 });
 
+const getVASectionVI = (role: string): Section => ({
+  id: `${role.toLowerCase().replace(/ /g, '-')}-readiness-preferences`,
+  title: "Part VI - VA Learning Preferences & Role Readiness",
+  questions: [
+    {
+      id: `${role.toLowerCase().replace(/ /g, '_')}_upskilling_interest`,
+      type: "radio",
+      label: "1. Would you be interested in participating in a VA Upskilling Program if it were offered by MMM?",
+      options: [
+        "Yes – I would definitely join",
+        "Maybe – depends on the format or time commitment",
+        "No – I don’t think I would join"
+      ],
+      required: true,
+    },
+    {
+      id: `${role.toLowerCase().replace(/ /g, '_')}_upskilling_no_reason`,
+      type: "textarea",
+      label: "If no, why not:",
+      dependsOn: `${role.toLowerCase().replace(/ /g, '_')}_upskilling_interest`,
+      required: false,
+    },
+    {
+      id: `${role.toLowerCase().replace(/ /g, '_')}_program_incentives`,
+      type: "checkbox",
+      label: "2. What would make this program a “no-brainer” for you to join? (Select top 2)",
+      options: [
+        "A certificate or credential after completing the program",
+        "Training focused on real VA tasks and workflows",
+        "Learning tools and systems used by clients (EMR, CRM, AI tools)",
+        "Opportunities to qualify for better clients or higher-level roles",
+        "Flexible or self-paced training schedule",
+        "Other"
+      ],
+      optionsWithInputs: ["Other"],
+      maxSelections: 2,
+      required: true,
+    },
+    {
+      id: `${role.toLowerCase().replace(/ /g, '_')}_time_commitment`,
+      type: "radio",
+      label: "3. How much time per week can you realistically commit to training?",
+      options: ["1–2 hours", "3–5 hours", "5+ hours", "Other"],
+      optionsWithInputs: ["Other"],
+      required: true,
+    },
+    {
+      id: `${role.toLowerCase().replace(/ /g, '_')}_training_format_preference`,
+      type: "checkbox",
+      label: "4. What type of training format would help you the most? (Select up to 2)",
+      options: [
+        "Step-by-step walkthroughs of real VA tasks",
+        "Real-world scenarios or case studies",
+        "Practice exercises or simulations",
+        "Video lessons you can watch anytime",
+        "Live coaching or Q&A sessions",
+        "Other"
+      ],
+      optionsWithInputs: ["Other"],
+      maxSelections: 2,
+      required: true,
+    },
+    {
+      id: `${role.toLowerCase().replace(/ /g, '_')}_role_readiness`,
+      type: "radio",
+      label: "5. Do you feel fully prepared to handle a Medical VA role today?",
+      options: [
+        "Yes – I feel fully confident",
+        "Somewhat – I can perform most tasks but still need guidance in some areas",
+        "No – I feel I still need more preparation or training"
+      ],
+      required: true,
+    },
+    {
+      id: `${role.toLowerCase().replace(/ /g, '_')}_missing_skills_for_confidence`,
+      type: "checkbox",
+      label: "6. What do you feel is missing before you can confidently perform at a high level as a VA?",
+      options: [
+        "Communication with clients and teams",
+        "Understanding client instructions and requirements",
+        "Medical or dental workflow knowledge",
+        "Documentation, reporting, or attention to detail",
+        "Time management and task prioritization",
+        "AI tools or digital tools used for work",
+        "Confidence in handling client interactions",
+        "Other"
+      ],
+      optionsWithInputs: ["Other"],
+      required: true,
+    }
+  ]
+});
+
+const getDesiredImprovementsQuestion = (roleId: string) => ({
+  id: `${roleId}_desired_improvements`,
+  type: "checkbox" as const,
+  label: "What skills would your client like you to improve or further develop? (Select up to 3)",
+  options: [
+    "Communication with clients and/or patients (calls, emails, messaging)",
+    "Understanding and following instructions accurately",
+    "Medical/dental workflow knowledge (e.g., insurance, scheduling, coordination)",
+    "Attention to detail in documentation and reporting",
+    "Time management and task prioritization",
+    "Use of tools and systems (EMR, CRM, scheduling tools, etc.)",
+    "AI or digital tool usage (e.g., ChatGPT, automation tools)",
+    "Proactiveness and ownership of tasks",
+    "Confidence in handling client interactions independently",
+    "Problem-solving and critical thinking",
+    "Other"
+  ],
+  optionsWithInputs: ["Other"],
+  maxSelections: 3,
+  required: true,
+});
+
 const getMedicalReceptionistSections = (): Section[] => {
   const role: Role = "Medical Receptionist";
 
@@ -258,8 +373,10 @@ const getMedicalReceptionistSections = (): Section[] => {
             "Managing Cancellations, No-Shows & Same-Day Changes",
             "Patient Intake & Accurate Data Entry",
             "Medical Records Handling & HIPAA Compliance",
-            "Internal Communication & Task Coordination"
+            "Internal Communication & Task Coordination",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
         {
@@ -271,8 +388,10 @@ const getMedicalReceptionistSections = (): Section[] => {
             "Patient Financial Communication (Copay, Deductible, OOP Costs)",
             "Pre-Authorizations & Referral Coordination",
             "EMR/EHR Navigation & Workflow Efficiency",
-            "Handling Billing Inquiries & Front Desk Support in RCM"
+            "Handling Billing Inquiries & Front Desk Support in RCM",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
       ],
@@ -423,8 +542,10 @@ const getMedicalAdminSections = (): Section[] => {
             "Document Handling & File Organization (Accuracy & Compliance)",
             "Task Management & Follow-Up Tracking",
             "Professional Written & Internal Communication",
-            "Meeting Coordination & Basic Minutes Documentation"
+            "Meeting Coordination & Basic Minutes Documentation",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
         {
@@ -439,8 +560,10 @@ const getMedicalAdminSections = (): Section[] => {
             "Basic Billing Support (Copays, Statements, Patient Inquiries)",
             "Form Processing (FMLA, Disability, Medical Forms)",
             "EMR/EHR Navigation & Workflow Management",
-            "Supporting Provider Workflow (Pre-visit Prep & Task Queues)"
+            "Supporting Provider Workflow (Pre-visit Prep & Task Queues)",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
       ],
@@ -593,8 +716,10 @@ const getMedicalBillerSections = (): Section[] => {
             "Claim Submission & Clearinghouse Workflow",
             "Payment Posting (EOB/ERA Interpretation)",
             "AR Follow-Up Fundamentals (Aging Buckets & Prioritization)",
-            "Denial Identification & Basic Resolution"
+            "Denial Identification & Basic Resolution",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
         {
@@ -609,8 +734,10 @@ const getMedicalBillerSections = (): Section[] => {
             "Patient Billing & Financial Communication",
             "Payer-Specific Workflows (Medicare, Medicaid, Commercial)",
             "EMR/PM & Clearinghouse Navigation (End-to-End Billing Flow)",
-            "Reporting & KPI Tracking (Collections, Denial Trends, AR Analysis)"
+            "Reporting & KPI Tracking (Collections, Denial Trends, AR Analysis)",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
       ],
@@ -757,8 +884,10 @@ const getMedicalScribeSections = (): Section[] => {
             "Charting Structure & Note Completion (HPI, ROS, PE, A&P)",
             "Pre-Charting & Post-Visit Documentation Workflow",
             "EMR/EHR Navigation & Templates",
-            "Provider Communication & Workflow Support"
+            "Provider Communication & Workflow Support",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
         {
@@ -770,8 +899,10 @@ const getMedicalScribeSections = (): Section[] => {
             "Order Entry Support (Labs, Imaging, Prescriptions)",
             "Care Coordination & Task/Follow-Up Management",
             "Documentation Compliance & Legal Accuracy (HIPAA)",
-            "Specialty-Specific Scribing (e.g., Primary Care, Cardiology, Ortho)"
+            "Specialty-Specific Scribing (e.g., Primary Care, Cardiology, Ortho)",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
       ],
@@ -915,8 +1046,10 @@ const getHealthEducatorSections = (): Section[] => {
             "Care Plan Support, Goal Setting & Progress Tracking",
             "Patient Engagement & Follow-Up Communication",
             "Documentation & EMR/EHR Updates",
-            "Program Coordination & Scheduling"
+            "Program Coordination & Scheduling",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
         {
@@ -928,8 +1061,10 @@ const getHealthEducatorSections = (): Section[] => {
             "Chronic Condition Education (e.g., Diabetes, Hypertension)",
             "Personalized Care Planning & Risk Stratification",
             "Patient Compliance Monitoring & Outcome Tracking",
-            "Health Program Delivery & Resource Coordination"
+            "Health Program Delivery & Resource Coordination",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
       ],
@@ -1070,8 +1205,10 @@ const getDentalReceptionistSections = (): Section[] => {
             "Managing Cancellations, No-Shows & Same-Day Changes",
             "Patient Intake & Chart Review",
             "Dental Records Handling & Documentation Accuracy",
-            "Internal Communication & Treatment Coordination"
+            "Internal Communication & Treatment Coordination",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
         {
@@ -1082,9 +1219,11 @@ const getDentalReceptionistSections = (): Section[] => {
             "Dental Insurance Verification (PPO, Frequencies, Limitations)",
             "Treatment Estimates & Patient Financial Communication (OOP, Copay)",
             "Pre-Authorizations & Referral Coordination",
-            "Dental EMR Navigation (Dentrix/Eaglesoft) & Workflow Efficiency",
-            "Handling Billing Inquiries & Front Desk Support in Dental RCM"
+            "Dental PMS Navigation (Dentrix/Eaglesoft) & Workflow Efficiency",
+            "Handling Billing Inquiries & Front Desk Support in Dental RCM",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
       ],
@@ -1225,8 +1364,10 @@ const getDentalBillerSections = (): Section[] => {
             "Insurance Verification & Eligibility Checks",
             "Payment Posting (EOB/ERA Interpretation)",
             "Basic Denial Identification & Resubmission",
-            "EMR/PMS Navigation (Dentrix, Eaglesoft, etc.)"
+            "EMR/PMS Navigation (Dentrix, Eaglesoft, etc.)",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
         {
@@ -1239,8 +1380,10 @@ const getDentalBillerSections = (): Section[] => {
             "Attachment Optimization & Narrative Writing",
             "Coordination of Benefits (COB) & Secondary Claims",
             "Ledger Review & Payment Reconciliation",
-            "Revenue Cycle Reporting & KPI Analysis"
+            "Revenue Cycle Reporting & KPI Analysis",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: true,
         },
       ],
@@ -1365,8 +1508,10 @@ const getGeneralBusinessVASections = (): Section[] => {
             "Customer Communication (Email, Chat, Basic Calls)",
             "Administrative Support & Task Coordination",
             "Order Processing & Basic Operations Support",
-            "Professional Written Communication"
+            "Professional Written Communication",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: false,
         },
         {
@@ -1378,8 +1523,10 @@ const getGeneralBusinessVASections = (): Section[] => {
             "Marketing Support (Social Media, Email Campaigns, Content Coordination)",
             "Logistics, Inventory & Vendor Coordination",
             "Basic Analytics & Performance Tracking",
-            "Reporting, Documentation & Workflow Optimization"
+            "Reporting, Documentation & Workflow Optimization",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: false,
         },
       ],
@@ -1598,8 +1745,10 @@ const getExecutiveAssistantVASections = (): Section[] => {
             "Task Management & Executive Support Workflow",
             "Professional Written Communication & Stakeholder Coordination",
             "Document Creation, File Management & Organization",
-            "Meeting Coordination & Minutes Documentation"
+            "Meeting Coordination & Minutes Documentation",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: false,
         },
         {
@@ -1611,8 +1760,10 @@ const getExecutiveAssistantVASections = (): Section[] => {
             "Research, Data Gathering & Executive Brief Preparation",
             "Presentation & Report Preparation (Slides, Summaries)",
             "Project Coordination & Cross-Functional Support",
-            "CRM & Business Tools Management (as applicable)"
+            "CRM & Business Tools Management (as applicable)",
+            "Other"
           ],
+          optionsWithInputs: ["Other"],
           required: false,
         },
       ],
@@ -2065,6 +2216,12 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
     description: "Dear Virtual Assistant,\n\nWe’re excited to share that we’re developing a VA Upskilling Program designed to support your professional growth, strengthen your skills, and help you succeed in your role.\n\nYour feedback will help us:\n• Identify the skills that matter most in your daily work\n• Understand where additional training or support is needed\n• Design practical modules that help you perform confidently and efficiently\n\nThis survey will take 3–5 minutes to complete.\n\nThank you for sharing your insights!",
     questions: [
       {
+        id: "full_name",
+        type: "text",
+        label: "Name (First Name, Last Name)",
+        required: true,
+      },
+      {
         id: "email",
         type: "text",
         label: "Email Address",
@@ -2142,6 +2299,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             columns: ["NA", "1", "2", "3", "4"],
             required: true,
           },
+          getDesiredImprovementsQuestion("biller"),
           {
             id: "biller_time_consuming_tasks",
             type: "checkbox",
@@ -2163,6 +2321,8 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           },
           {
             id: "biller_medical_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Medical",
             type: "checkbox",
             label: "Electronic Medical Record (Medical): (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -2179,14 +2339,18 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "AdvancedMD",
               "Office Ally",
               "Meditech",
-              "Allscripts"
+              "Allscripts",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "biller_dental_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Dental",
             type: "checkbox",
-            label: "Dental EMRs: (Select all that apply)",
+            label: "Dental PMS: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
             variant: "grid",
             options: [
@@ -2196,12 +2360,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Curve Dental",
               "ClearDent",
               "ABELDent",
-              "Tracker"
+              "Tracker",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "biller_insurance_tools",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Insurance & Eligibility Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -2210,12 +2378,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Availity",
               "NaviNet",
               "Waystar",
-              "Change Healthcare"
+              "Change Healthcare",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "biller_other_tools_selection",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Other Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -2229,8 +2401,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Google Workspace (Docs, Sheets, Calendar)",
               "Microsoft Office (Outlook, Excel)",
               "Trello",
-              "Asana"
+              "Asana",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
@@ -2263,8 +2437,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "File Management / Cloud Storage (Google Drive, Dropbox)",
               "Internal Communication Tools (Slack, Microsoft Teams)",
               "Task Management Tools",
-              "Documentation / Knowledge Base Tools"
+              "Documentation / Knowledge Base Tools",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ]
@@ -2285,8 +2461,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Claim Submission & Clearinghouse Workflow",
               "Payment Posting (EOB/ERA Interpretation)",
               "AR Follow-Up Fundamentals (Aging Buckets & Prioritization)",
-              "Denial Identification & Basic Resolution"
+              "Denial Identification & Basic Resolution",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           },
           {
@@ -2301,8 +2479,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Patient Billing & Financial Communication",
               "Payer-Specific Workflows (Medicare, Medicaid, Commercial)",
               "EMR/PM & Clearinghouse Navigation (End-to-End Billing Flow)",
-              "Reporting & KPI Tracking (Collections, Denial Trends, AR Analysis)"
+              "Reporting & KPI Tracking (Collections, Denial Trends, AR Analysis)",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ]
@@ -2403,7 +2583,8 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             required: true,
           }
         ],
-      }
+      },
+      getVASectionVI("Medical Biller")
     ],
     "Medical Receptionist": [
       {
@@ -2430,6 +2611,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             columns: ["NA", "1", "2", "3", "4"],
             required: true,
           },
+          getDesiredImprovementsQuestion("receptionist"),
           {
             id: "receptionist_time_consuming_tasks",
             type: "checkbox",
@@ -2454,6 +2636,8 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           },
           {
             id: "receptionist_medical_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Medical",
             type: "checkbox",
             label: "Electronic Medical Record (Medical): (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -2470,14 +2654,18 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "AdvancedMD",
               "Office Ally",
               "Meditech",
-              "Allscripts"
+              "Allscripts",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "receptionist_dental_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Dental",
             type: "checkbox",
-            label: "Dental EMRs: (Select all that apply)",
+            label: "Dental PMS: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
             variant: "grid",
             options: [
@@ -2487,12 +2675,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Curve Dental",
               "ClearDent",
               "ABELDent",
-              "Tracker"
+              "Tracker",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "receptionist_insurance_tools",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Insurance & Eligibility Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -2501,12 +2693,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Availity",
               "NaviNet",
               "Waystar",
-              "Change Healthcare"
+              "Change Healthcare",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "receptionist_other_tools_selection",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Other Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -2520,8 +2716,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Google Workspace (Docs, Sheets, Calendar)",
               "Microsoft Office (Outlook, Excel)",
               "Trello",
-              "Asana"
+              "Asana",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
@@ -2554,8 +2752,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "File Management / Cloud Storage (Google Drive, Dropbox)",
               "Internal Communication Tools (Slack, Microsoft Teams)",
               "Task Management Tools",
-              "Documentation / Knowledge Base Tools"
+              "Documentation / Knowledge Base Tools",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ]
@@ -2575,8 +2775,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Managing Cancellations, No-Shows & Same-Day Changes",
               "Patient Intake & Accurate Data Entry",
               "Medical Records Handling & HIPAA Compliance",
-              "Internal Communication & Task Coordination"
+              "Internal Communication & Task Coordination",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           },
           {
@@ -2588,8 +2790,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Patient Financial Communication (Copay, Deductible, OOP Costs)",
               "Pre-Authorizations & Referral Coordination",
               "EMR/EHR Navigation & Workflow Efficiency",
-              "Handling Billing Inquiries & Front Desk Support in RCM"
+              "Handling Billing Inquiries & Front Desk Support in RCM",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ]
@@ -2690,7 +2894,8 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             required: true,
           }
         ],
-      }
+      },
+      getVASectionVI("Medical Receptionist")
     ],
     "Medical Administrative Assistant": [
       {
@@ -2717,6 +2922,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             columns: ["NA", "1", "2", "3", "4"],
             required: true,
           },
+          getDesiredImprovementsQuestion("admin"),
           {
             id: "admin_crucial_tasks",
             type: "checkbox",
@@ -2739,6 +2945,8 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           },
           {
             id: "admin_medical_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Medical",
             type: "checkbox",
             label: "Electronic Medical Record (Medical): (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -2755,14 +2963,18 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "AdvancedMD",
               "Office Ally",
               "Meditech",
-              "Allscripts"
+              "Allscripts",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "admin_dental_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Dental",
             type: "checkbox",
-            label: "Dental EMRs: (Select all that apply)",
+            label: "Dental PMS: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
             variant: "grid",
             options: [
@@ -2772,12 +2984,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Curve Dental",
               "ClearDent",
               "ABELDent",
-              "Tracker"
+              "Tracker",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "admin_insurance_tools",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Insurance & Eligibility Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -2786,12 +3002,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Availity",
               "NaviNet",
               "Waystar",
-              "Change Healthcare"
+              "Change Healthcare",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "admin_other_tools_selection",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Other Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -2805,8 +3025,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Google Workspace (Docs, Sheets, Calendar)",
               "Microsoft Office (Outlook, Excel)",
               "Trello",
-              "Asana"
+              "Asana",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
@@ -2839,8 +3061,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "File Management / Cloud Storage (Google Drive, Dropbox)",
               "Internal Communication Tools (Slack, Microsoft Teams)",
               "Task Management Tools",
-              "Documentation / Knowledge Base Tools"
+              "Documentation / Knowledge Base Tools",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ],
@@ -2860,8 +3084,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Patient Intake & Accurate Data Entry",
               "Medical Records Handling & HIPAA Compliance",
               "Internal Communication & Task Coordination",
-              "Managing Cancellations, No-Shows & Same-Day Changes"
+              "Managing Cancellations, No-Shows & Same-Day Changes",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           },
           {
@@ -2873,8 +3099,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Patient Financial Communication (Copay, Deductible, OOP Costs)",
               "Pre-Authorizations & Referral Coordination",
               "EMR/EHR Navigation & Workflow Efficiency",
-              "Handling Billing Inquiries & Front Desk Support in RCM"
+              "Handling Billing Inquiries & Front Desk Support in RCM",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ]
@@ -2976,6 +3204,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getVASectionVI("Medical Administrative Assistant")
     ],
     "Medical Scribe": [
       {
@@ -3000,6 +3229,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             columns: ["NA", "1", "2", "3", "4"],
             required: true,
           },
+          getDesiredImprovementsQuestion("scribe"),
           {
             id: "scribe_time_consuming_tasks",
             type: "checkbox",
@@ -3022,6 +3252,8 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           },
           {
             id: "scribe_medical_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Medical",
             type: "checkbox",
             label: "Electronic Medical Record (Medical): (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -3038,14 +3270,18 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "AdvancedMD",
               "Office Ally",
               "Meditech",
-              "Allscripts"
+              "Allscripts",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "scribe_dental_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Dental",
             type: "checkbox",
-            label: "Dental EMRs: (Select all that apply)",
+            label: "Dental PMS: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
             variant: "grid",
             options: [
@@ -3055,12 +3291,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Curve Dental",
               "ClearDent",
               "ABELDent",
-              "Tracker"
+              "Tracker",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "scribe_insurance_tools",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Insurance & Eligibility Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -3069,12 +3309,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Availity",
               "NaviNet",
               "Waystar",
-              "Change Healthcare"
+              "Change Healthcare",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "scribe_other_tools_selection",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Other Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -3088,8 +3332,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Google Workspace (Docs, Sheets, Calendar)",
               "Microsoft Office (Outlook, Excel)",
               "Trello",
-              "Asana"
+              "Asana",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
@@ -3122,8 +3368,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "File Management / Cloud Storage (Google Drive, Dropbox)",
               "Internal Communication Tools (Slack, Microsoft Teams)",
               "Task Management Tools",
-              "Documentation / Knowledge Base Tools"
+              "Documentation / Knowledge Base Tools",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ],
@@ -3143,8 +3391,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "HPI (History of Present Illness) Documentation",
               "Review of Systems (ROS) & Physical Exam Entry",
               "EMR/EHR Navigation & Workflow Efficiency",
-              "HIPAA Compliance & Documentation Standards"
+              "HIPAA Compliance & Documentation Standards",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           },
           {
@@ -3156,8 +3406,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Coding Support (ICD-10 & CPT Selection Basics)",
               "Managing Orders (Labs, Imaging, Referrals)",
               "Patient Education & Discharge Summary Support",
-              "Advanced Clinical Workflow Optimization"
+              "Advanced Clinical Workflow Optimization",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ]
@@ -3259,6 +3511,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getVASectionVI("Medical Scribe")
     ],
     "Health Educator": [
       {
@@ -3282,6 +3535,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             columns: ["NA", "1", "2", "3", "4"],
             required: true,
           },
+          getDesiredImprovementsQuestion("educator"),
           {
             id: "educator_time_consuming_tasks",
             type: "checkbox",
@@ -3302,6 +3556,8 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           },
           {
             id: "health_educator_medical_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Medical",
             type: "checkbox",
             label: "Electronic Medical Record (Medical): (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -3318,14 +3574,18 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "AdvancedMD",
               "Office Ally",
               "Meditech",
-              "Allscripts"
+              "Allscripts",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "health_educator_dental_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Dental",
             type: "checkbox",
-            label: "Dental EMRs: (Select all that apply)",
+            label: "Dental PMS: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
             variant: "grid",
             options: [
@@ -3335,12 +3595,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Curve Dental",
               "ClearDent",
               "ABELDent",
-              "Tracker"
+              "Tracker",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "health_educator_insurance_tools",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Insurance & Eligibility Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -3349,12 +3613,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Availity",
               "NaviNet",
               "Waystar",
-              "Change Healthcare"
+              "Change Healthcare",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "health_educator_other_tools_selection",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Other Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -3368,8 +3636,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Google Workspace (Docs, Sheets, Calendar)",
               "Microsoft Office (Outlook, Excel)",
               "Trello",
-              "Asana"
+              "Asana",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
@@ -3402,8 +3672,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "File Management / Cloud Storage (Google Drive, Dropbox)",
               "Internal Communication Tools (Slack, Microsoft Teams)",
               "Task Management Tools",
-              "Documentation / Knowledge Base Tools"
+              "Documentation / Knowledge Base Tools",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ],
@@ -3423,8 +3695,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Motivational Interviewing & Behavioral Change Coaching",
               "Creating & Organizing Patient Education Materials",
               "EMR Documentation & Patient Progress Tracking",
-              "HIPAA Compliance & Patient Privacy"
+              "HIPAA Compliance & Patient Privacy",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           },
           {
@@ -3436,8 +3710,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Community Resource Coordination & Referrals",
               "Telehealth Platform Navigation & Virtual Coaching",
               "Data Tracking & Health Outcome Reporting",
-              "Developing Wellness Programs & Outreach Strategies"
+              "Developing Wellness Programs & Outreach Strategies",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ]
@@ -3539,6 +3815,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getVASectionVI("Health Educator")
     ],
     "Dental Receptionist": [
       {
@@ -3562,6 +3839,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             columns: ["NA", "1", "2", "3", "4"],
             required: true,
           },
+          getDesiredImprovementsQuestion("dental_receptionist"),
           {
             id: "dental_receptionist_time_consuming_tasks",
             type: "checkbox",
@@ -3583,6 +3861,8 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           },
           {
             id: "dental_receptionist_medical_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Medical",
             type: "checkbox",
             label: "Electronic Medical Record (Medical): (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -3599,14 +3879,18 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "AdvancedMD",
               "Office Ally",
               "Meditech",
-              "Allscripts"
+              "Allscripts",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "dental_receptionist_dental_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Dental",
             type: "checkbox",
-            label: "Dental EMRs: (Select all that apply)",
+            label: "Dental PMS: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
             variant: "grid",
             options: [
@@ -3616,12 +3900,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Curve Dental",
               "ClearDent",
               "ABELDent",
-              "Tracker"
+              "Tracker",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "dental_receptionist_insurance_tools",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Insurance & Eligibility Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -3630,12 +3918,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Availity",
               "NaviNet",
               "Waystar",
-              "Change Healthcare"
+              "Change Healthcare",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "dental_receptionist_other_tools_selection",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Other Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -3649,8 +3941,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Google Workspace (Docs, Sheets, Calendar)",
               "Microsoft Office (Outlook, Excel)",
               "Trello",
-              "Asana"
+              "Asana",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
@@ -3683,8 +3977,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "File Management / Cloud Storage (Google Drive, Dropbox)",
               "Internal Communication Tools (Slack, Microsoft Teams)",
               "Task Management Tools",
-              "Documentation / Knowledge Base Tools"
+              "Documentation / Knowledge Base Tools",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ],
@@ -3704,8 +4000,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Managing Cancellations, No-Shows & Same-Day Changes",
               "Patient Intake & Accurate Data Entry",
               "Medical/Dental Records Handling & HIPAA Compliance",
-              "Internal Communication & Task Coordination"
+              "Internal Communication & Task Coordination",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           },
           {
@@ -3717,8 +4015,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Patient Financial Communication (Copay, Deductible, OOP Costs)",
               "Pre-Authorizations & Referral Coordination",
               "EMR/EHR Navigation & Workflow Efficiency",
-              "Handling Billing Inquiries & Front Desk Support in RCM"
+              "Handling Billing Inquiries & Front Desk Support in RCM",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ]
@@ -3820,6 +4120,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getVASectionVI("Dental Receptionist")
     ],
     "Dental Biller": [
       {
@@ -3843,6 +4144,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             columns: ["NA", "1", "2", "3", "4"],
             required: true,
           },
+          getDesiredImprovementsQuestion("dental_biller"),
           {
             id: "dental_biller_time_consuming_tasks",
             type: "checkbox",
@@ -3864,6 +4166,8 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           },
           {
             id: "dental_biller_medical_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Medical",
             type: "checkbox",
             label: "Electronic Medical Record (Medical): (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -3880,14 +4184,18 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "AdvancedMD",
               "Office Ally",
               "Meditech",
-              "Allscripts"
+              "Allscripts",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "dental_biller_dental_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Dental",
             type: "checkbox",
-            label: "Dental EMRs: (Select all that apply)",
+            label: "Dental PMS: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
             variant: "grid",
             options: [
@@ -3897,12 +4205,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Curve Dental",
               "ClearDent",
               "ABELDent",
-              "Tracker"
+              "Tracker",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "dental_biller_insurance_tools",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Insurance & Eligibility Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -3911,12 +4223,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Availity",
               "NaviNet",
               "Waystar",
-              "Change Healthcare"
+              "Change Healthcare",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "dental_biller_other_tools_selection",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Other Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -3930,8 +4246,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Google Workspace (Docs, Sheets, Calendar)",
               "Microsoft Office (Outlook, Excel)",
               "Trello",
-              "Asana"
+              "Asana",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
@@ -3964,8 +4282,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "File Management / Cloud Storage (Google Drive, Dropbox)",
               "Internal Communication Tools (Slack, Microsoft Teams)",
               "Task Management Tools",
-              "Documentation / Knowledge Base Tools"
+              "Documentation / Knowledge Base Tools",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ],
@@ -3990,8 +4310,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "EMR/Billing System Navigation (Dentrix, Eaglesoft, etc.)",
               "Patient Billing (Statements, balances)",
               "Basic Accounts Receivable (AR) Follow-Up",
-              "Documentation Review for Billing Accuracy"
+              "Documentation Review for Billing Accuracy",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           },
           {
@@ -4115,6 +4437,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getVASectionVI("Dental Biller")
     ],
     "Executive Assistant VA": [
       {
@@ -4139,6 +4462,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             columns: ["NA", "1", "2", "3", "4"],
             required: true,
           },
+          getDesiredImprovementsQuestion("ea"),
           {
             id: "ea_time_consuming_tasks",
             type: "checkbox",
@@ -4159,6 +4483,8 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           },
           {
             id: "ea_medical_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Medical",
             type: "checkbox",
             label: "Electronic Medical Record (Medical): (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -4175,14 +4501,18 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "AdvancedMD",
               "Office Ally",
               "Meditech",
-              "Allscripts"
+              "Allscripts",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "ea_dental_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Dental",
             type: "checkbox",
-            label: "Dental EMRs: (Select all that apply)",
+            label: "Dental PMS: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
             variant: "grid",
             options: [
@@ -4192,12 +4522,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Curve Dental",
               "ClearDent",
               "ABELDent",
-              "Tracker"
+              "Tracker",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "ea_insurance_tools",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Insurance & Eligibility Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -4206,12 +4540,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Availity",
               "NaviNet",
               "Waystar",
-              "Change Healthcare"
+              "Change Healthcare",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "ea_other_tools_selection",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Other Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -4225,8 +4563,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Google Workspace (Docs, Sheets, Calendar)",
               "Microsoft Office (Outlook, Excel)",
               "Trello",
-              "Asana"
+              "Asana",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
@@ -4282,8 +4622,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Travel Planning & Logistics Management",
               "Document Preparation & Presentation Support",
               "Task Tracking & Project Coordination",
-              "Professional Communication & Stakeholder Management"
+              "Professional Communication & Stakeholder Management",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           },
           {
@@ -4295,8 +4637,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Event Planning & Coordination",
               "Social Media Management & Personal Branding Support",
               "Basic Financial Tracking & Expense Management",
-              "Workflow Automation & Process Optimization"
+              "Workflow Automation & Process Optimization",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ]
@@ -4398,6 +4742,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           }
         ],
       },
+      getVASectionVI("Executive Assistant VA")
     ],
     "General Business VA": [
       {
@@ -4420,6 +4765,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
             columns: ["NA", "1", "2", "3", "4"],
             required: true,
           },
+          getDesiredImprovementsQuestion("gb"),
           {
             id: "business_time_consuming_tasks",
             type: "checkbox",
@@ -4441,6 +4787,8 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
           },
           {
             id: "gb_medical_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Medical",
             type: "checkbox",
             label: "Electronic Medical Record (Medical): (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -4457,14 +4805,18 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "AdvancedMD",
               "Office Ally",
               "Meditech",
-              "Allscripts"
+              "Allscripts",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "gb_dental_systems",
+            dependsOn: "practice_type",
+            dependsOnValue: "Dental",
             type: "checkbox",
-            label: "Dental EMRs: (Select all that apply)",
+            label: "Dental PMS: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
             variant: "grid",
             options: [
@@ -4474,12 +4826,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Curve Dental",
               "ClearDent",
               "ABELDent",
-              "Tracker"
+              "Tracker",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "gb_insurance_tools",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Insurance & Eligibility Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -4488,12 +4844,16 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Availity",
               "NaviNet",
               "Waystar",
-              "Change Healthcare"
+              "Change Healthcare",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
             id: "gb_other_tools_selection",
+            dependsOn: "practice_type",
+            dependsOnValue: ["Medical", "Dental"],
             type: "checkbox",
             label: "Other Tools: (Select all that apply)",
             description: "Please select the systems and tools you actively use in your current role. This helps us understand your actual system exposure and proficiency, so we can provide the right training and support.",
@@ -4507,8 +4867,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Google Workspace (Docs, Sheets, Calendar)",
               "Microsoft Office (Outlook, Excel)",
               "Trello",
-              "Asana"
+              "Asana",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: false,
           },
           {
@@ -4564,8 +4926,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Basic Social Media Management & Posting",
               "Research & Information Organization",
               "Task Management & Daily Reporting",
-              "Professional Communication & Team Collaboration"
+              "Professional Communication & Team Collaboration",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           },
           {
@@ -4577,8 +4941,10 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
               "Content Creation & Basic Graphic Design (Canva, etc.)",
               "Email Marketing & Newsletter Support",
               "E-commerce Support (Order Processing, Product Listing)",
-              "Basic Bookkeeping & Invoice Management"
+              "Basic Bookkeeping & Invoice Management",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             required: true,
           }
         ]
@@ -4691,6 +5057,12 @@ export const SUPPORT_SURVEY_SCHEMA: SupportSurveySchema = {
     description: "Dear Team,\n\nWe’re excited to announce that for this quarter, we are starting the development of our VA Upskilling Program! \n\nThis program will focus on strengthening VA skills, boosting retention, and creating practical training that truly supports them in their roles. Your insights in this survey will help us design a program that addresses real challenges and maximizes VA impact for our clients.\n\nThis survey will take 3–5 minutes to complete.\n\nThank you for sharing your insights!",
     questions: [
       {
+        id: "full_name",
+        type: "text",
+        label: "Name (First Name, Last Name)",
+        required: true,
+      },
+      {
         id: "support_email",
         type: "text",
         label: "Email",
@@ -4716,13 +5088,14 @@ export const SUPPORT_SURVEY_SCHEMA: SupportSurveySchema = {
             type: "checkbox",
             label: "Based on client feedback, which VA skills most often meet expectations? (Select all that apply)",
             options: [
-              "Role-specific technical skill gaps",
-              "Communication skills gaps (verbal/written clarity, client-facing tone)",
-              "AI/tool proficiency gaps",
-              "Scheduling or workflow errors",
-              "Documentation / reporting errors"
+              "Role-specific technical skills",
+              "Communication skills (verbal/written clarity, client-facing tone)",
+              "AI/tool proficiency",
+              "Scheduling or workflow proficiency",
+              "Documentation / reporting proficiency",
+              "Other"
             ],
-            optionsWithInputs: ["Role-specific technical skill gaps"],
+            optionsWithInputs: ["Role-specific technical skills", "Other"],
             required: true,
           },
           {
@@ -4737,6 +5110,51 @@ export const SUPPORT_SURVEY_SCHEMA: SupportSurveySchema = {
               "Documentation / reporting errors"
             ],
             optionsWithInputs: ["Role-specific technical skill gaps"],
+            required: true,
+          },
+          {
+            id: "va_roles_difficult_to_place",
+            type: "checkbox",
+            label: "Which VA roles are most difficult to place due to current skill gaps? (Select all that apply and indicate missing skills per role)",
+            options: [
+              "Dental Biller",
+              "Dental Receptionist",
+              "Medical Scribe",
+              "Health Educator",
+              "Medical Biller",
+              "Medical Receptionist",
+              "Medical Administrative Assistant",
+              "Other roles"
+            ],
+            optionsWithInputs: [
+              "Dental Biller",
+              "Dental Receptionist",
+              "Medical Scribe",
+              "Health Educator",
+              "Medical Biller",
+              "Medical Receptionist",
+              "Medical Administrative Assistant",
+              "Other roles"
+            ],
+            required: true,
+          },
+          {
+            id: "top_hiring_factors",
+            type: "checkbox",
+            label: "When clients decide to hire a VA, what are the TOP 3 factors they prioritize most? (Select up to 3)",
+            options: [
+              "Strong communication skills (spoken/written)",
+              "Relevant experience in their field",
+              "Confidence & independence",
+              "Technical skills (billing, prior auth, EMR/CRM systems, etc.)",
+              "Personality / culture fit",
+              "Speed / responsiveness",
+              "Cost / budget",
+              "Attention to detail / accuracy",
+              "Other"
+            ],
+            optionsWithInputs: ["Other"],
+            maxSelections: 3,
             required: true,
           },
           {
@@ -4770,8 +5188,10 @@ export const SUPPORT_SURVEY_SCHEMA: SupportSurveySchema = {
               "Communication Skills (verbal, written, comprehension, client interaction)",
               "Role-Specific / Technical Skills (insurance, billing, intake, pre-auth, scribing)",
               "AI & Digital Skills (AI tools, automation, system adaptability)",
-              "Professional Readiness (accountability, attention to detail, problem-solving)"
+              "Professional Readiness (accountability, attention to detail, problem-solving)",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
             maxSelections: 3,
             required: true,
           }
@@ -4909,8 +5329,55 @@ export const SUPPORT_SURVEY_SCHEMA: SupportSurveySchema = {
               "Communication Skills (verbal, written, comprehension, client interaction)",
               "Role-Specific / Technical Skills (insurance, billing, intake, pre-auth, scribing)",
               "AI & Digital Skills (AI tools, automation, system adaptability)",
-              "Professional Readiness (accountability, attention to detail, problem-solving)"
+              "Professional Readiness (accountability, attention to detail, problem-solving)",
+              "Other"
             ],
+            optionsWithInputs: ["Other"],
+            maxSelections: 3,
+            required: true,
+          },
+          {
+            id: "va_roles_difficult_to_place",
+            type: "checkbox",
+            label: "Which VA roles are most difficult to place due to current skill gaps? (Select all that apply and indicate missing skills per role)",
+            options: [
+              "Dental Biller",
+              "Dental Receptionist",
+              "Medical Scribe",
+              "Health Educator",
+              "Medical Biller",
+              "Medical Receptionist",
+              "Medical Administrative Assistant",
+              "Other roles"
+            ],
+            optionsWithInputs: [
+              "Dental Biller",
+              "Dental Receptionist",
+              "Medical Scribe",
+              "Health Educator",
+              "Medical Biller",
+              "Medical Receptionist",
+              "Medical Administrative Assistant",
+              "Other roles"
+            ],
+            required: true,
+          },
+          {
+            id: "top_hiring_factors",
+            type: "checkbox",
+            label: "When clients decide to hire a VA, what are the TOP 3 factors they prioritize most? (Select up to 3)",
+            options: [
+              "Strong communication skills (spoken/written)",
+              "Relevant experience in their field",
+              "Confidence & independence",
+              "Technical skills (billing, prior auth, EMR/CRM systems, etc.)",
+              "Personality / culture fit",
+              "Speed / responsiveness",
+              "Cost / budget",
+              "Attention to detail / accuracy",
+              "Other"
+            ],
+            optionsWithInputs: ["Other"],
             maxSelections: 3,
             required: true,
           }

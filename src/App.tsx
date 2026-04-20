@@ -316,18 +316,25 @@ function SurveyApp() {
       });
 
       let activeRole = "";
-      let fullName = user?.displayName || "User";
-      let email = user?.email || "no-email@provided.com";
+      let fullName = (sanitizedResponses.full_name as string) || (formData.full_name as string) || user?.displayName || "Anonymous User";
+      let email = (sanitizedResponses.email as string) || (formData.email as string) || user?.email || "no-email@provided.com";
 
       if (userType === "Virtual Assistant (Medical & Business)") {
         const selectedRoles = (formData.va_role_feedback as Role[]) || [];
         const remainingRoles = selectedRoles.filter(r => !completedRoles.includes(r));
         activeRole = remainingRoles[0] || "Unknown";
-        email = (sanitizedResponses.email as string) || email;
+        
+        // Ensure email/fullname are always picked up from the very first step even if not in current steps
+        if (!sanitizedResponses.full_name && formData.full_name) {
+          fullName = formData.full_name as string;
+        }
+        if (!sanitizedResponses.email && formData.email) {
+          email = formData.email as string;
+        }
       } else if (userType === "Support Team") {
         activeRole = (formData.support_role as string) || "Support";
+        email = (sanitizedResponses.support_email as string) || (formData.support_email as string) || email;
         fullName = "Support Team Member";
-        email = (sanitizedResponses.support_email as string) || email;
       }
 
       const submission = {
@@ -335,8 +342,8 @@ function SurveyApp() {
         full_name: fullName,
         email: email,
         role: activeRole,
-        practice_type: (sanitizedResponses.practice_type as string) || "N/A",
-        va_count: (sanitizedResponses.va_count as string) || "N/A",
+        practice_type: (sanitizedResponses.practice_type as string) || (formData.practice_type as string) || "N/A",
+        va_count: (sanitizedResponses.va_count as string) || (formData.va_count as string) || "N/A",
         sections,
         submitted_at: serverTimestamp(),
         is_additional_role: completedRoles.length > 0
@@ -658,6 +665,22 @@ function SurveyApp() {
                 </div>
 
                 <Card className="space-y-12 shadow-xl shadow-slate-200/50 border-slate-100">
+                  {Object.keys(errors).length > 0 && (
+                    <div className="p-4 bg-brand-teal/5 border border-brand-teal/20 rounded-2xl flex items-start gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                      <div className="w-10 h-10 bg-brand-teal/10 rounded-full flex items-center justify-center shrink-0">
+                        <AlertCircle className="w-5 h-5 text-brand-teal" />
+                      </div>
+                      <div className="flex-1 space-y-1 pt-1">
+                        <h3 className="text-sm font-bold text-slate-900">Please review your answers</h3>
+                        <p className="text-xs text-slate-500">
+                          {Object.values(errors).includes("Please complete all rows in the grid") 
+                            ? "Some grid questions have unanswered rows. Please scroll down to complete them."
+                            : "Some required fields need your attention before you can continue."}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   {currentStep.questions.map((q) => (
                     <QuestionRenderer
                       key={q.id}

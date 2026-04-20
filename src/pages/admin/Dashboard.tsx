@@ -435,7 +435,7 @@ const AdminDashboard: React.FC = () => {
       ]).slice(0, 15),
       part2: mergeAggregates(vaRoles.map(r => {
         const id = roleIdMap[r];
-        return aggregateGenericSection(`${id}-tasks-workflow`, [`${id}_task_difficulty`, 'task_grid', `${id}_time_consuming_tasks`], true);
+        return aggregateGenericSection(`${id}-tasks-workflow`, [`${id}_task_difficulty`, 'task_grid', `${id}_time_consuming_tasks`, `${id}_desired_improvements`], true);
       })).slice(0, 15),
       part3: mergeAggregates(vaRoles.map(r => {
         const id = roleIdMap[r];
@@ -456,6 +456,15 @@ const AdminDashboard: React.FC = () => {
           `${id}_ai_tool_comfort`,
           `${id}_ai_usage_areas`,
           `${id}_ai_skills_to_learn`
+        ], true);
+      })).slice(0, 15),
+      part6: mergeAggregates(vaRoles.map(r => {
+        const sectionId = `${r.toLowerCase().replace(/ /g, '-')}-readiness-preferences`;
+        return aggregateGenericSection(sectionId, [
+          'learning_format_preference',
+          'ideal_training_frequency',
+          'va_preparedness_rating',
+          'support_system_effectiveness'
         ], true);
       })).slice(0, 15),
       
@@ -513,6 +522,43 @@ const AdminDashboard: React.FC = () => {
       })(),
     };
   }, [responses, reportRoleFilter, reportExpFilter, reportStartDate, reportEndDate, reportType]);
+
+  const renderAnswerValue = (value: any) => {
+    if (value === null || value === undefined || value === '') return 'N/A';
+    
+    if (Array.isArray(value)) {
+      if (value.length === 0) return 'None selected';
+      return (
+        <div className="flex flex-wrap gap-2">
+          {value.map((v, i) => (
+            <span key={i} className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-700 font-medium">
+              {String(v)}
+            </span>
+          ))}
+        </div>
+      );
+    }
+    
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      const entries = Object.entries(value);
+      if (entries.length === 0) return 'No data';
+      
+      return (
+        <div className="grid grid-cols-1 divide-y divide-slate-100 bg-white rounded-xl border border-slate-100 overflow-hidden">
+          {entries.map(([label, val]) => (
+            <div key={label} className="flex justify-between items-center p-3 hover:bg-slate-50 transition-colors">
+              <span className="text-slate-500 font-medium text-xs max-w-[65%]">{label}</span>
+              <span className="px-2 py-0.5 bg-brand-teal/10 text-brand-teal rounded text-xs font-bold ring-1 ring-brand-teal/20">
+                {String(val)}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    
+    return <p className="text-slate-700 font-medium">{String(value)}</p>;
+  };
 
   const surveyAnalysisData = useMemo(() => {
     const isSupportRole = Object.keys(SUPPORT_SURVEY_SCHEMA.roleSections).includes(analysisRole);
@@ -688,12 +734,14 @@ const AdminDashboard: React.FC = () => {
         await deleteDoc(doc(db, 'responses', deleteConfirm.id));
         if (selectedResponse?.id === deleteConfirm.id) setSelectedResponse(null);
         setSelectedResponseIds(prev => prev.filter(item => item !== deleteConfirm.id));
+        console.log("Successfully deleted response", deleteConfirm.id);
       } else if (deleteConfirm.type === 'selected') {
         const batch = writeBatch(db);
         selectedResponseIds.forEach(id => {
           batch.delete(doc(db, 'responses', id));
         });
         await batch.commit();
+        console.log(`Successfully deleted ${selectedResponseIds.length} responses`);
         setSelectedResponseIds([]);
         if (selectedResponse && selectedResponseIds.includes(selectedResponse.id)) {
           setSelectedResponse(null);
@@ -708,10 +756,12 @@ const AdminDashboard: React.FC = () => {
           });
           await batch.commit();
         }
+        console.log("Successfully deleted all responses");
         setSelectedResponseIds([]);
         setSelectedResponse(null);
       }
       setDeleteConfirm(null);
+      alert("Successfully deleted responses.");
     } catch (error) {
       console.error("Error during deletion:", error);
       alert("Failed to delete. Please try again.");
@@ -1262,12 +1312,12 @@ const AdminDashboard: React.FC = () => {
                         <div className="flex items-center justify-end gap-2">
                           <button 
                             onClick={(e) => handleDeleteResponse(res.id, e)}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                             title="Delete Response"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
-                          <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                          <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 group-hover:translate-x-0 transition-transform">
                             View <ChevronRight className="h-4 w-4" />
                           </span>
                         </div>
@@ -1615,6 +1665,30 @@ const AdminDashboard: React.FC = () => {
                     <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[#3b82f6] shadow-sm shadow-blue-200"></div> Proficient (3.0+)</div>
                     <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[#fbbf24] shadow-sm shadow-amber-200"></div> Developing (2.5+)</div>
                     <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[#ef4444] shadow-sm shadow-red-200"></div> Basic (&lt;2.5)</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Part 6 (VA Only) */}
+              {reportType === 'VA' && roleReportData.part6 && roleReportData.part6.length > 0 && (
+                <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 lg:col-span-2">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-10 h-10 bg-brand-teal/10 text-brand-teal rounded-xl flex items-center justify-center font-black text-lg">6</div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 tracking-tight">Part VI - Learning Preferences & Role Readiness</h3>
+                      <p className="text-xs text-slate-400 font-medium italic">Upskilling readiness and system effectiveness</p>
+                    </div>
+                  </div>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={roleReportData.part6} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                        <XAxis type="number" hide />
+                        <YAxis dataKey="name" type="category" width={200} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} axisLine={false} tickLine={false} />
+                        <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                        <Bar dataKey="value" fill="#0d9488" radius={[0, 8, 8, 0]} barSize={24} />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               )}
@@ -1996,7 +2070,7 @@ const AdminDashboard: React.FC = () => {
                                     <div key={key}>
                                       <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{questionLabel}</h4>
                                       <div className="text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm">
-                                        {Array.isArray(value) ? value.join(', ') : typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                                        {renderAnswerValue(value)}
                                       </div>
                                     </div>
                                   );
@@ -2068,7 +2142,7 @@ const AdminDashboard: React.FC = () => {
                                     <div key={key}>
                                       <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{questionLabel}</h4>
                                       <div className="text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm">
-                                        {Array.isArray(value) ? value.join(', ') : typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                                        {renderAnswerValue(value)}
                                       </div>
                                     </div>
                                   );

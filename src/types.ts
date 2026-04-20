@@ -43,6 +43,7 @@ export interface Question {
   stepLabels?: Record<number, string>; // For scale
   dynamicRowsFrom?: string | string[]; // ID(s) of checkbox question(s) to pull rows from
   dependsOn?: string; // ID of the question this question depends on
+  dependsOnValue?: string | string[]; // Specific value(s) from dependsOn that trigger visibility
   optionsMap?: Record<string, string[]>; // Map of values from dependsOn to options for this question
 }
 

@@ -31,10 +31,6 @@ export function QuestionRenderer({
       ? question.optionsMap[fullResponse[question.dependsOn]] 
       : question.options;
 
-    if (question.dependsOn && !fullResponse[question.dependsOn]) {
-      return null;
-    }
-
     switch (question.type) {
       case "text":
         return (
@@ -62,63 +58,76 @@ export function QuestionRenderer({
         return (
           <div className="space-y-3">
             {options.map((option) => (
-              <div key={option} className="space-y-2">
+              <div key={option} className="h-full">
                 <label
-                  className={`flex items-center p-4 rounded-xl border cursor-pointer transition-all ${
+                  className={`flex flex-col p-4 rounded-xl border cursor-pointer transition-all h-full ${
                     value === option
                       ? "border-brand-teal bg-brand-teal/5 text-brand-teal shadow-sm"
                       : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   }`}
+                  onDoubleClick={() => {
+                    if (value === option) {
+                      onChange(undefined);
+                    }
+                  }}
                 >
-                  <input
-                    type="radio"
-                    name={question.id}
-                    value={option}
-                    checked={value === option}
-                    onChange={() => onChange(option)}
-                    className="hidden"
-                  />
-                  <div
-                    className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                      value === option ? "border-brand-teal" : "border-slate-300"
-                    }`}
-                  >
-                    <AnimatePresence>
-                      {value === option && (
-                        <motion.div
-                          initial={{ scale: 0, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0, opacity: 0 }}
-                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                          className="w-2.5 h-2.5 bg-brand-teal rounded-full"
-                        />
-                      )}
-                    </AnimatePresence>
-                  </div>
-                  <span className="font-medium">{option}</span>
-                </label>
-                {((option === "Other" && value === "Other") || 
-                  (question.optionsWithInputs?.includes(option) && value === option)) && (
-                  <div className="px-4 pb-2">
-                    <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">
-                      {option === "Other" ? "If other, please specify:" : `Please specify ${option.toLowerCase()}:`}
-                    </label>
+                  <div className="flex items-center">
                     <input
-                      type="text"
-                      value={option === "Other" ? (otherValue || "") : (optionDetails[option] || "")}
-                      onChange={(e) => {
-                        if (option === "Other") {
-                          onOtherChange?.(e.target.value);
-                        } else {
-                          onOptionDetailChange?.(option, e.target.value);
-                        }
-                      }}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-brand-teal focus:border-transparent outline-none transition-all"
-                      placeholder={option === "Other" ? "Please specify..." : `Enter ${option.toLowerCase()} name...`}
-                      autoFocus={option === "Other"}
+                      type="radio"
+                      name={question.id}
+                      value={option}
+                      checked={value === option}
+                      onChange={() => onChange(option)}
+                      className="hidden"
                     />
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 mr-3 flex-shrink-0 flex items-center justify-center transition-colors ${
+                        value === option ? "border-brand-teal" : "border-slate-300"
+                      }`}
+                    >
+                      <AnimatePresence>
+                        {value === option && (
+                          <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            className="w-2.5 h-2.5 bg-brand-teal rounded-full"
+                          />
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    <span className="font-medium">{option}</span>
                   </div>
-                )}
+
+                  {((option === "Other" && value === "Other") || 
+                    (question.optionsWithInputs?.includes(option) && value === option)) && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4 pt-4 border-t border-brand-teal/10"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <label className="block text-xs font-bold text-brand-teal/70 mb-2 uppercase tracking-wider">
+                        {option === "Other" ? "If other, please specify:" : `Please specify ${option.toLowerCase()}:`}
+                      </label>
+                      <input
+                        type="text"
+                        value={option === "Other" ? (otherValue || "") : (optionDetails[option] || "")}
+                        onChange={(e) => {
+                          if (option === "Other") {
+                            onOtherChange?.(e.target.value);
+                          } else {
+                            onOptionDetailChange?.(option, e.target.value);
+                          }
+                        }}
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-brand-teal focus:border-transparent outline-none transition-all bg-white text-slate-900"
+                        placeholder={option === "Other" ? "Please specify..." : `Enter ${option.toLowerCase()} name...`}
+                        autoFocus={option === "Other"}
+                      />
+                    </motion.div>
+                  )}
+                </label>
               </div>
             ))}
           </div>
@@ -143,64 +152,72 @@ export function QuestionRenderer({
         return (
           <div className={question.variant === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-3"}>
             {options.map((option) => (
-              <div key={option} className="space-y-2">
+              <div key={option} className="h-full">
                 <label
-                  className={`flex items-center p-4 rounded-xl border cursor-pointer transition-all h-full ${
+                  className={`flex flex-col p-4 rounded-xl border cursor-pointer transition-all h-full ${
                     currentValues.includes(option)
                       ? "border-brand-teal bg-brand-teal/5 text-brand-teal shadow-sm"
                       : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   } ${question.variant === "grid" ? "hover:scale-[1.02] active:scale-[0.98]" : ""}`}
                 >
-                  <input
-                    type="checkbox"
-                    checked={currentValues.includes(option)}
-                    onChange={() => handleCheckboxChange(option)}
-                    className="hidden"
-                  />
-                  <div
-                    className={`w-5 h-5 rounded border-2 mr-3 flex-shrink-0 flex items-center justify-center transition-colors ${
-                      currentValues.includes(option)
-                        ? "border-brand-teal bg-brand-teal"
-                        : "border-slate-300"
-                    }`}
-                  >
-                    <AnimatePresence>
-                      {currentValues.includes(option) && (
-                        <motion.div
-                          initial={{ scale: 0, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0, opacity: 0 }}
-                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        >
-                          <Check className="w-3.5 h-3.5 text-white" />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                  <span className="font-medium">{option}</span>
-                </label>
-                {((option === "Other" && currentValues.includes("Other")) || 
-                  (question.optionsWithInputs?.includes(option) && currentValues.includes(option))) && (
-                  <div className="px-4 pb-2">
-                    <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">
-                      {option === "Other" ? "If other, please specify:" : `Please specify ${option.toLowerCase()}:`}
-                    </label>
+                  <div className="flex items-center">
                     <input
-                      type="text"
-                      value={option === "Other" ? (otherValue || "") : (optionDetails[option] || "")}
-                      onChange={(e) => {
-                        if (option === "Other") {
-                          onOtherChange?.(e.target.value);
-                        } else {
-                          onOptionDetailChange?.(option, e.target.value);
-                        }
-                      }}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-brand-teal focus:border-transparent outline-none transition-all"
-                      placeholder={option === "Other" ? "Please specify..." : `Enter ${option.toLowerCase()} name...`}
-                      autoFocus={option === "Other"}
+                      type="checkbox"
+                      checked={currentValues.includes(option)}
+                      onChange={() => handleCheckboxChange(option)}
+                      className="hidden"
                     />
+                    <div
+                      className={`w-5 h-5 rounded border-2 mr-3 flex-shrink-0 flex items-center justify-center transition-colors ${
+                        currentValues.includes(option)
+                          ? "border-brand-teal bg-brand-teal"
+                          : "border-slate-300"
+                      }`}
+                    >
+                      <AnimatePresence>
+                        {currentValues.includes(option) && (
+                          <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                          >
+                            <Check className="w-3.5 h-3.5 text-white" />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    <span className="font-medium">{option}</span>
                   </div>
-                )}
+
+                  {((option === "Other" && currentValues.includes("Other")) || 
+                    (question.optionsWithInputs?.includes(option) && currentValues.includes(option))) && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4 pt-4 border-t border-brand-teal/10"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <label className="block text-xs font-bold text-brand-teal/70 mb-2 uppercase tracking-wider">
+                        {option === "Other" ? "If other, please specify:" : `Please specify ${option.toLowerCase()}:`}
+                      </label>
+                      <input
+                        type="text"
+                        value={option === "Other" ? (otherValue || "") : (optionDetails[option] || "")}
+                        onChange={(e) => {
+                          if (option === "Other") {
+                            onOtherChange?.(e.target.value);
+                          } else {
+                            onOptionDetailChange?.(option, e.target.value);
+                          }
+                        }}
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-brand-teal focus:border-transparent outline-none transition-all bg-white text-slate-900"
+                        placeholder={option === "Other" ? "Please specify..." : `Enter ${option.toLowerCase()} name...`}
+                        autoFocus={option === "Other"}
+                      />
+                    </motion.div>
+                  )}
+                </label>
               </div>
             ))}
             {question.maxSelections && (
@@ -228,6 +245,11 @@ export function QuestionRenderer({
                   <button
                     type="button"
                     onClick={() => onChange(num)}
+                    onDoubleClick={() => {
+                      if (value === num) {
+                        onChange(undefined);
+                      }
+                    }}
                     className={`w-full py-4 rounded-xl border font-bold transition-all ${
                       value === num
                         ? "border-brand-teal bg-brand-teal/5 text-brand-teal shadow-sm"
@@ -291,8 +313,18 @@ export function QuestionRenderer({
           );
         }
 
+        const missingRows = rows.filter(row => !gridValue[row]);
+        const hasMissingRows = rows.length > 0 && missingRows.length > 0;
+
         return (
-          <div className="overflow-x-auto -mx-4 md:mx-0">
+          <div className="space-y-4">
+            {hasMissingRows && (
+              <div className="flex items-center gap-2 p-3 bg-brand-teal/10 border border-brand-teal/30 rounded-xl text-brand-teal text-sm font-medium animate-pulse">
+                <Check className="w-4 h-4 rotate-180 opacity-50" />
+                <span>You have {missingRows.length} unanswered row{missingRows.length > 1 ? 's' : ''} in this section.</span>
+              </div>
+            )}
+            <div className="overflow-x-auto -mx-4 md:mx-0">
             <table className="w-full min-w-[600px] border-collapse">
               <thead>
                 <tr>
@@ -338,7 +370,17 @@ export function QuestionRenderer({
                     </td>
                     {question.columns?.map((col) => (
                       <td key={col} className="p-4 border-b border-slate-100 text-center">
-                        <label className="inline-flex items-center justify-center w-full h-full cursor-pointer">
+                        <label 
+                          className="inline-flex items-center justify-center w-full h-full cursor-pointer"
+                          onDoubleClick={() => {
+                            if (gridValue[row] === col) {
+                              onChange({
+                                ...gridValue,
+                                [row]: undefined,
+                              });
+                            }
+                          }}
+                        >
                           <input
                             type="radio"
                             name={`${question.id}-${row}`}
@@ -379,14 +421,31 @@ export function QuestionRenderer({
               </tbody>
             </table>
           </div>
-        );
+        </div>
+      );
 
-      default:
-        return null;
+    default:
+      return null;
+  }
+};
+
+  const shouldShow = () => {
+    if (!question.dependsOn) return true;
+    const parentValue = fullResponse[question.dependsOn];
+    if (!parentValue) return false;
+    
+    if (question.dependsOnValue) {
+      const values = Array.isArray(question.dependsOnValue) ? question.dependsOnValue : [question.dependsOnValue];
+      if (Array.isArray(parentValue)) {
+        return parentValue.some(v => values.includes(v));
+      }
+      return values.includes(parentValue as string);
     }
+    
+    return true;
   };
 
-  if (question.dependsOn && !fullResponse[question.dependsOn]) {
+  if (!shouldShow()) {
     return null;
   }
 
