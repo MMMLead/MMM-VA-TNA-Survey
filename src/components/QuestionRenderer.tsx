@@ -101,6 +101,7 @@ export function QuestionRenderer({
                   </div>
 
                   {((option === "Other" && value === "Other") || 
+                    (option === "Other roles" && value === "Other roles") ||
                     (question.optionsWithInputs?.includes(option) && value === option)) && (
                     <motion.div 
                       initial={{ opacity: 0, y: -10 }}
@@ -109,21 +110,27 @@ export function QuestionRenderer({
                       onClick={(e) => e.stopPropagation()}
                     >
                       <label className="block text-xs font-bold text-brand-teal/70 mb-2 uppercase tracking-wider">
-                        {option === "Other" ? "If other, please specify:" : `Please specify ${option.toLowerCase()}:`}
+                        {option === "Other roles" ? "What specific skills are commonly missing for this role?" 
+                          : option === "Other" ? "If other, please specify:" 
+                          : option === "Role-specific technical skills" ? "Please specify role-specific technical skill:"
+                          : `Please specify skill gaps for ${option.toLowerCase()}:`}
                       </label>
                       <input
                         type="text"
-                        value={option === "Other" ? (otherValue || "") : (optionDetails[option] || "")}
+                        value={option === "Other" || option === "Other roles" ? (otherValue || "") : (optionDetails[option] || "")}
                         onChange={(e) => {
-                          if (option === "Other") {
+                          if (option === "Other" || option === "Other roles") {
                             onOtherChange?.(e.target.value);
                           } else {
                             onOptionDetailChange?.(option, e.target.value);
                           }
                         }}
                         className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-brand-teal focus:border-transparent outline-none transition-all bg-white text-slate-900"
-                        placeholder={option === "Other" ? "Please specify..." : `Enter ${option.toLowerCase()} name...`}
-                        autoFocus={option === "Other"}
+                        placeholder={option === "Other roles" ? "Enter missing skills..." 
+                          : option === "Other" ? "Please specify..." 
+                          : option === "Role-specific technical skills" ? "Enter role-specific technical skills"
+                          : `Enter ${option.toLowerCase()} skill gaps...`}
+                        autoFocus={option === "Other" || option === "Other roles"}
                       />
                     </motion.div>
                   )}
@@ -141,7 +148,10 @@ export function QuestionRenderer({
           if (currentValues.includes(option)) {
             newValues = currentValues.filter((v: string) => v !== option);
           } else {
-            if (question.maxSelections && currentValues.length >= question.maxSelections) {
+            // Determine the count for limit checking
+            // Option 'Other' is exempt from the limit
+            const countForLimit = currentValues.filter(v => v !== "Other").length;
+            if (question.maxSelections && countForLimit >= question.maxSelections && option !== "Other") {
               return;
             }
             newValues = [...currentValues, option];
@@ -191,6 +201,7 @@ export function QuestionRenderer({
                   </div>
 
                   {((option === "Other" && currentValues.includes("Other")) || 
+                    (option === "Other roles" && currentValues.includes("Other roles")) ||
                     (question.optionsWithInputs?.includes(option) && currentValues.includes(option))) && (
                     <motion.div 
                       initial={{ opacity: 0, y: -10 }}
@@ -199,21 +210,27 @@ export function QuestionRenderer({
                       onClick={(e) => e.stopPropagation()}
                     >
                       <label className="block text-xs font-bold text-brand-teal/70 mb-2 uppercase tracking-wider">
-                        {option === "Other" ? "If other, please specify:" : `Please specify ${option.toLowerCase()}:`}
+                        {option === "Other roles" ? "What specific skills are commonly missing for this role?" 
+                          : option === "Other" ? "If other, please specify:" 
+                          : option === "Role-specific technical skills" ? "Please specify role-specific technical skill:"
+                          : `Please specify skill gaps for ${option.toLowerCase()}:`}
                       </label>
                       <input
                         type="text"
-                        value={option === "Other" ? (otherValue || "") : (optionDetails[option] || "")}
+                        value={option === "Other" || option === "Other roles" ? (otherValue || "") : (optionDetails[option] || "")}
                         onChange={(e) => {
-                          if (option === "Other") {
+                          if (option === "Other" || option === "Other roles") {
                             onOtherChange?.(e.target.value);
                           } else {
                             onOptionDetailChange?.(option, e.target.value);
                           }
                         }}
                         className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-brand-teal focus:border-transparent outline-none transition-all bg-white text-slate-900"
-                        placeholder={option === "Other" ? "Please specify..." : `Enter ${option.toLowerCase()} name...`}
-                        autoFocus={option === "Other"}
+                        placeholder={option === "Other roles" ? "Enter missing skills..." 
+                          : option === "Other" ? "Please specify..." 
+                          : option === "Role-specific technical skills" ? "Enter role-specific technical skills"
+                          : `Enter ${option.toLowerCase()} skill gaps...`}
+                        autoFocus={option === "Other" || option === "Other roles"}
                       />
                     </motion.div>
                   )}

@@ -156,6 +156,7 @@ const getVASectionVI = (role: string): Section => ({
       type: "textarea",
       label: "If no, why not:",
       dependsOn: `${role.toLowerCase().replace(/ /g, '_')}_upskilling_interest`,
+      dependsOnValue: "No – I don’t think I would join",
       required: false,
     },
     {
@@ -5107,54 +5108,10 @@ export const SUPPORT_SURVEY_SCHEMA: SupportSurveySchema = {
               "Communication skills gaps (verbal/written clarity, client-facing tone)",
               "AI/tool proficiency gaps",
               "Scheduling or workflow errors",
-              "Documentation / reporting errors"
-            ],
-            optionsWithInputs: ["Role-specific technical skill gaps"],
-            required: true,
-          },
-          {
-            id: "va_roles_difficult_to_place",
-            type: "checkbox",
-            label: "Which VA roles are most difficult to place due to current skill gaps? (Select all that apply and indicate missing skills per role)",
-            options: [
-              "Dental Biller",
-              "Dental Receptionist",
-              "Medical Scribe",
-              "Health Educator",
-              "Medical Biller",
-              "Medical Receptionist",
-              "Medical Administrative Assistant",
-              "Other roles"
-            ],
-            optionsWithInputs: [
-              "Dental Biller",
-              "Dental Receptionist",
-              "Medical Scribe",
-              "Health Educator",
-              "Medical Biller",
-              "Medical Receptionist",
-              "Medical Administrative Assistant",
-              "Other roles"
-            ],
-            required: true,
-          },
-          {
-            id: "top_hiring_factors",
-            type: "checkbox",
-            label: "When clients decide to hire a VA, what are the TOP 3 factors they prioritize most? (Select up to 3)",
-            options: [
-              "Strong communication skills (spoken/written)",
-              "Relevant experience in their field",
-              "Confidence & independence",
-              "Technical skills (billing, prior auth, EMR/CRM systems, etc.)",
-              "Personality / culture fit",
-              "Speed / responsiveness",
-              "Cost / budget",
-              "Attention to detail / accuracy",
+              "Documentation / reporting errors",
               "Other"
             ],
-            optionsWithInputs: ["Other"],
-            maxSelections: 3,
+            optionsWithInputs: ["Role-specific technical skill gaps", "Other"],
             required: true,
           },
           {
@@ -5180,20 +5137,10 @@ export const SUPPORT_SURVEY_SCHEMA: SupportSurveySchema = {
             required: true,
           },
           {
-            id: "cdvo_impact_on_placement_success",
-            type: "checkbox",
-            label: "Which skill areas, if strengthened, would have the biggest impact on placement success? (Select up to 3)",
-            options: [
-              "Core VA Skills (scheduling, task/workflow management, data accuracy, system navigation)",
-              "Communication Skills (verbal, written, comprehension, client interaction)",
-              "Role-Specific / Technical Skills (insurance, billing, intake, pre-auth, scribing)",
-              "AI & Digital Skills (AI tools, automation, system adaptability)",
-              "Professional Readiness (accountability, attention to detail, problem-solving)",
-              "Other"
-            ],
-            optionsWithInputs: ["Other"],
-            maxSelections: 3,
-            required: true,
+            id: "cdvo_additional_suggestions",
+            type: "text",
+            label: "Is there any other skill, training topic, or support that was not covered that you believe would help you place more VAs successfully? Please share your suggestions.",
+            required: false,
           }
         ]
       },
@@ -5360,6 +5307,24 @@ export const SUPPORT_SURVEY_SCHEMA: SupportSurveySchema = {
               "Medical Administrative Assistant",
               "Other roles"
             ],
+            required: true,
+          },
+          {
+            id: "fix_va_readiness",
+            type: "radio",
+            label: "If you could fix one thing about VA readiness that would immediately improve placements, what would it be? (Select one)",
+            options: [
+              "Stronger communication skills (clarity, confidence, written/verbal communication)",
+              "Better understanding of client workflows and real-world tasks",
+              "Higher technical proficiency (EMR, CRM, billing, scheduling systems, etc.)",
+              "Improved critical thinking and problem-solving",
+              "Greater confidence and independence in handling tasks without supervision",
+              "Faster responsiveness and sense of urgency",
+              "Better attention to detail and accuracy in outputs",
+              "Stronger AI/tool usage skills (ChatGPT, automation, reporting tools, etc.)",
+              "Other"
+            ],
+            optionsWithInputs: ["Other"],
             required: true,
           },
           {

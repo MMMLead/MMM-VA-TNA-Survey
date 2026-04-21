@@ -226,30 +226,46 @@ function SurveyApp() {
               }
             });
           }
-        } else if (val === "Other" || (Array.isArray(val) && val.includes("Other"))) {
-          const otherVal = formData[`${q.id}_other`];
-          if (!otherVal || (otherVal as string).trim() === "") {
-            newErrors[q.id] = "Please specify the 'Other' option";
-            isValid = false;
-          }
-        }
-
-        // Check options with inputs
-        if (q.optionsWithInputs && Array.isArray(val)) {
-          const details = (formData[`${q.id}_details`] as Record<string, string>) || {};
-          const missingDetails = q.optionsWithInputs.filter(opt => 
-            val.includes(opt) && (!details[opt] || details[opt].trim() === "")
-          );
-          if (missingDetails.length > 0) {
-            newErrors[q.id] = `Please specify details for: ${missingDetails.join(", ")}`;
-            isValid = false;
-          }
         }
       }
 
-      if (q.maxSelections && Array.isArray(val) && val.length > q.maxSelections) {
-        newErrors[q.id] = `Please select at most ${q.maxSelections} options`;
-        isValid = false;
+      // Special handling for "Other" and options with inputs whether required or not
+      const otherVal = formData[`${q.id}_other`];
+      const hasOther = val === "Other" || (Array.isArray(val) && val.includes("Other"));
+      const hasOtherRoles = val === "Other roles" || (Array.isArray(val) && val.includes("Other roles"));
+      
+      if (hasOther || hasOtherRoles) {
+        if (!otherVal || (otherVal as string).trim() === "") {
+          newErrors[q.id] = `Please specify the '${hasOther ? 'Other' : 'Other roles'}' option`;
+          isValid = false;
+        }
+      }
+
+      // Check options with inputs (works for both radio and checkbox)
+      if (q.optionsWithInputs && val) {
+        const details = (formData[`${q.id}_details`] as Record<string, string>) || {};
+        const qOtherVal = formData[`${q.id}_other`] as string;
+        
+        const missingDetails = q.optionsWithInputs.filter(opt => {
+          const isSelected = Array.isArray(val) ? val.includes(opt) : val === opt;
+          if (!isSelected) return false;
+          if (opt === "Other" || opt === "Other roles") return !qOtherVal || qOtherVal.trim() === "";
+          return !details[opt] || details[opt].trim() === "";
+        });
+
+        if (missingDetails.length > 0) {
+          newErrors[q.id] = `Please specify details for: ${missingDetails.join(", ")}`;
+          isValid = false;
+        }
+      }
+
+      // Max selections check - "Other" is exempt from the limit
+      if (q.maxSelections && Array.isArray(val)) {
+        const countForLimit = val.filter(v => v !== "Other").length;
+        if (countForLimit > q.maxSelections) {
+          newErrors[q.id] = `Please select at most ${q.maxSelections} options`;
+          isValid = false;
+        }
       }
     });
 
@@ -406,7 +422,6 @@ function SurveyApp() {
         currentStep.questions.forEach(q => {
           if (q.dependsOn === questionId) {
             delete next[q.id];
-            // Also clear "other" and "details" for the dependent question
             delete next[`${q.id}_other`];
             delete next[`${q.id}_details`];
           }
@@ -415,10 +430,13 @@ function SurveyApp() {
       
       return next;
     });
-    if (errors[questionId]) {
+
+    // Clear error for this field or its parent if it's an "other" field
+    const parentId = questionId.endsWith("_other") ? questionId.replace("_other", "") : questionId;
+    if (errors[parentId]) {
       setErrors(prev => {
         const next = { ...prev };
-        delete next[questionId];
+        delete next[parentId];
         return next;
       });
     }
@@ -435,6 +453,15 @@ function SurveyApp() {
         }
       };
     });
+    
+    // Clear error for parent question when typing in details
+    if (errors[questionId]) {
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next[questionId];
+        return next;
+      });
+    }
   };
 
   const handleReset = () => {
