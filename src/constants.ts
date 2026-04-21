@@ -2214,7 +2214,7 @@ export const CLIENT_SURVEY_SCHEMA: ClientSurveySchema = {
   initial: {
     id: "client-initial",
     title: "Part I – Virtual Assistant Information",
-    description: "Dear Virtual Assistant,\n\nWe’re excited to share that we’re developing a VA Upskilling Program designed to support your professional growth, strengthen your skills, and help you succeed in your role.\n\nYour feedback will help us:\n• Identify the skills that matter most in your daily work\n• Understand where additional training or support is needed\n• Design practical modules that help you perform confidently and efficiently\n\nThis survey will take 3–5 minutes to complete.\n\nThank you for sharing your insights!",
+    description: "Dear Virtual Assistant,\n\nWe’re excited to share that we’re developing a VA Upskilling Program designed to support your professional growth, strengthen your skills, and help you succeed in your role.\n\nYour feedback will help us:\n• Identify the skills that matter most in your daily work\n• Understand where additional training or support is needed\n• Design practical modules that help you perform confidently and efficiently\n\nThis survey will take 10 minutes to complete.\n\nThank you for sharing your insights!",
     questions: [
       {
         id: "full_name",
@@ -5055,7 +5055,7 @@ export const SUPPORT_SURVEY_SCHEMA: SupportSurveySchema = {
   initial: {
     id: "support-role",
     title: "Support Role Information",
-    description: "Dear Team,\n\nWe’re excited to announce that for this quarter, we are starting the development of our VA Upskilling Program! \n\nThis program will focus on strengthening VA skills, boosting retention, and creating practical training that truly supports them in their roles. Your insights in this survey will help us design a program that addresses real challenges and maximizes VA impact for our clients.\n\nThis survey will take 3–5 minutes to complete.\n\nThank you for sharing your insights!",
+    description: "Dear Team,\n\nWe’re excited to announce that for this quarter, we are starting the development of our VA Upskilling Program! \n\nThis program will focus on strengthening VA skills, boosting retention, and creating practical training that truly supports them in their roles. Your insights in this survey will help us design a program that addresses real challenges and maximizes VA impact for our clients.\n\nThis survey will take 10 minutes to complete.\n\nThank you for sharing your insights!",
     questions: [
       {
         id: "full_name",
